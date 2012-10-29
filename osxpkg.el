@@ -190,21 +190,22 @@ more information about the MATCH regexp."
 	 (info (car (osxpkg-get-packages-info pkg)))
 	 (buffer-read-only nil))
     (with-current-buffer (get-buffer-create buffer)
-      (erase-buffer)
-      (let* ((volume (osxpkg-volume info))
-	     (location (osxpkg-location info))
-	     (prefix (concat volume location)))
-	(loop for f in (osxpkg-files info)
-	      do (osxpkg-print-file f prefix)))
-      (osxpkg-mode)
-      (setq header-line-format
-	    (format "Package: %s (%s) installed at %s"
-		    (osxpkg-package-id info)
-		    (osxpkg-version info)
-		    (format-time-string "%Y-%m-%d %H:%M:%S"
-					(seconds-to-time
-					 (osxpkg-install-time info)))))
-      (goto-char (point-min)))
+      (let ((buffer-read-only nil))
+	(erase-buffer)
+	(let* ((volume (osxpkg-volume info))
+	       (location (osxpkg-location info))
+	       (prefix (concat volume location)))
+	  (loop for f in (osxpkg-files info)
+		do (osxpkg-print-file f prefix)))
+	(osxpkg-mode)
+	(setq header-line-format
+	      (format "Package: %s (%s) installed on %s"
+		      (osxpkg-package-id info)
+		      (osxpkg-version info)
+		      (format-time-string "%Y-%m-%d at %H:%M:%S"
+					  (seconds-to-time
+					   (osxpkg-install-time info)))))
+	(goto-char (point-min))))
     (switch-to-buffer buffer)))
 
 (defun osxpkg-list-pkg ()
