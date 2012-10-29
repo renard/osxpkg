@@ -224,7 +224,8 @@ more information about the MATCH regexp."
 (defun osxpkg-list-mode-view ()
   "View package details."
   (interactive)
-  (let ((pkg (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
+  (let ((pkg (buffer-substring-no-properties
+	      (+ 2 (point-at-bol)) (point-at-eol))))
     (osxpkg-show-pkg pkg)))
 
 (unless osxpkg-list-mode-map
@@ -234,8 +235,8 @@ more information about the MATCH regexp."
   (define-key osxpkg-list-mode-map "p" 'previous-line)
   (define-key osxpkg-list-mode-map "v" 'osxpkg-list-mode-view)
   (define-key osxpkg-list-mode-map (kbd "<return>") 'osxpkg-list-mode-view)
-  ;;(define-key osxpkg-list-mode-map "d" 'osxpkg-mode-mark-delete)
-  ;;(define-key osxpkg-list-mode-map "u" 'osxpkg-mode-unmark)
+  (define-key osxpkg-list-mode-map "d" 'osxpkg-list-mode-mark-delete)
+  (define-key osxpkg-list-mode-map "u" 'osxpkg-list-mode-unmark)
   (define-key osxpkg-list-mode-map "q" 'quit-window))
 
 (unless osxpkg-mode-map
@@ -286,6 +287,18 @@ more information about the MATCH regexp."
       (if (file-directory-p filename)
 	  (osxpkg-mode-mark "d")
 	(osxpkg-mode-mark "D")))))
+
+(defun osxpkg-list-mode-mark (what)
+  (osxpkg-mode-mark what))
+
+(defun osxpkg-list-mode-unmark ()
+  (interactive)
+  (osxpkg-mode-unmark))
+
+(defun osxpkg-list-mode-mark-delete ()
+  (interactive)
+  (osxpkg-list-mode-mark "D"))
+
 
 (defun osxpkg-mode ()
   "Major mode for browsing MacOSX installed packages."
