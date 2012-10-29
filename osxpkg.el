@@ -187,8 +187,8 @@ more information about the MATCH regexp."
 		   "Show package: "
 		   (osxpkg-list-packages) nil  t)))
 	 (buffer (format "Details of package %s" pkg))
-	 (info (car (osxpkg-get-packages-info pkg)))
-	 (buffer-read-only nil))
+	 (info (car (osxpkg-get-packages-info pkg))))
+
     (with-current-buffer (get-buffer-create buffer)
       (let ((buffer-read-only nil))
 	(erase-buffer)
