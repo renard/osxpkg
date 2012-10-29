@@ -216,7 +216,7 @@ more information about the MATCH regexp."
       (let ((buffer-read-only nil))
 	(erase-buffer)
 	(loop for pkg in (osxpkg-list-packages)
-	      do (insert pkg "\n"))
+	      do (insert "  " pkg "\n"))
 	(goto-char (point-min))
 	(osxpkg-list-mode))
       (switch-to-buffer buffer))))
