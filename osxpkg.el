@@ -5,7 +5,7 @@
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: emacs, 
 ;; Created: 2012-10-18
-;; Last changed: 2012-10-29 20:03:16
+;; Last changed: 2012-10-29 20:19:00
 ;; Licence: WTFPL, grab your copy here: http://sam.zoy.org/wtfpl/
 
 ;; This file is NOT part of GNU Emacs.
@@ -48,6 +48,12 @@
 (defvar osxpkg-mode-map nil
   "Keymap `osxpkg-mode'.")
 
+
+(defvar osxpkg-list-mode-hook nil
+  "Hooks to run after `osxpkg-list-mode' init.")
+
+(defvar osxpkg-list-mode-map nil
+  "Keymap `osxpkg-list-mode'.")
 
 (defstruct osxpkg
   package-id
@@ -201,6 +207,36 @@ more information about the MATCH regexp."
       (goto-char (point-min)))
     (switch-to-buffer buffer)))
 
+(defun osxpkg-list-pkg ()
+  "List all installed packages."
+  (interactive)
+  (let ((buffer "Installed OSX packages"))
+    (with-current-buffer (get-buffer-create buffer)
+      (let ((buffer-read-only nil))
+	(erase-buffer)
+	(loop for pkg in (osxpkg-list-packages)
+	      do (insert pkg "\n"))
+	(goto-char (point-min))
+	(osxpkg-list-mode))
+      (switch-to-buffer buffer))))
+
+(defun osxpkg-list-mode-view ()
+  "View package details."
+  (interactive)
+  (let ((pkg (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
+    (osxpkg-show-pkg pkg)))
+
+(unless osxpkg-list-mode-map
+  (setq osxpkg-list-mode-map (make-keymap))
+  (suppress-keymap osxpkg-list-mode-map)
+  (define-key osxpkg-list-mode-map "n" 'next-line)
+  (define-key osxpkg-list-mode-map "p" 'previous-line)
+  (define-key osxpkg-list-mode-map "v" 'osxpkg-list-mode-view)
+  (define-key osxpkg-list-mode-map (kbd "<return>") 'osxpkg-list-mode-view)
+  ;;(define-key osxpkg-list-mode-map "d" 'osxpkg-mode-mark-delete)
+  ;;(define-key osxpkg-list-mode-map "u" 'osxpkg-mode-unmark)
+  (define-key osxpkg-list-mode-map "q" 'quit-window))
+
 (unless osxpkg-mode-map
   (setq osxpkg-mode-map (make-keymap))
   (suppress-keymap osxpkg-mode-map)
@@ -261,6 +297,18 @@ more information about the MATCH regexp."
   (if (fboundp 'run-mode-hooks)
       (run-mode-hooks 'osxpkg-mode-hook)
     (run-hooks 'osxpkg-mode-hook)))
+
+(defun osxpkg-list-mode ()
+  "Major mode for browsing MacOSX installed packages."
+  (kill-all-local-variables)
+  (use-local-map osxpkg-list-mode-map)
+  (setq major-mode 'osxpkg-list-mode
+	mode-name "OSX Packages list"
+	buffer-read-only t
+	truncate-lines t)
+  (if (fboundp 'run-mode-hooks)
+      (run-mode-hooks 'osxpkg-list-mode-hook)
+    (run-hooks 'osxpkg-list-mode-hook)))
 
 
 
