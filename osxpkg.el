@@ -197,7 +197,8 @@ more information about the MATCH regexp."
 		    (osxpkg-version info)
 		    (format-time-string "%Y-%m-%d %H:%M:%S"
 					(seconds-to-time
-					 (osxpkg-install-time info))))))
+					 (osxpkg-install-time info)))))
+      (goto-char (point-min)))
     (switch-to-buffer buffer)))
 
 (unless osxpkg-mode-map
