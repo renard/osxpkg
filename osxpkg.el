@@ -340,7 +340,12 @@ more information about the MATCH regexp."
       (run-mode-hooks 'osxpkg-list-mode-hook)
     (run-hooks 'osxpkg-list-mode-hook)))
 
-
+(defun osxpkg-update-cache()
+  ""
+  (interactive)
+  (loop for pkg in (osxpkg-list-packages)
+	do (with-temp-file (format "~/.emacs.d/.tmp/osxpkg/%s" pkg)
+	     (insert (format "%S" (car (osxpkg-get-packages-info pkg)))))))
 
 (provide 'osxpkg)
 
