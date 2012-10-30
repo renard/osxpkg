@@ -5,7 +5,7 @@
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: emacs, 
 ;; Created: 2012-10-18
-;; Last changed: 2012-10-29 20:39:23
+;; Last changed: 2012-10-30 00:14:58
 ;; Licence: WTFPL, grab your copy here: http://sam.zoy.org/wtfpl/
 
 ;; This file is NOT part of GNU Emacs.
@@ -106,26 +106,29 @@ more information about the MATCH regexp."
 
 (defun osxpkg-get-pkg-content-detail (pkg)
   "Get detailed file list of PKG."
-  (let ((files (split-string
-		 (shell-command-to-string
-		  (format "%s -pfmMuUgGtsc '%s/%s.bom'"
-			  osxpkg-lsbom osxpkg-recipes-dir pkg))
-		 "[\n]+" t)))
-    (loop for file in files
-	  collect (destructuring-bind
-		      (f m M u U g G ti s c)
-		      (split-string file "\t" )
-		    (make-osxpkg-file
-		     :name f
-		     :nmode (string-to-int m)
-		     :mode M
-		     :uid (string-to-int u)
-		     :nuid U
-		     :gid (string-to-int g)
-		     :ngid G
-		     :timestamp (string-to-int ti)
-		     :size (string-to-int s)
-		     :cksum (string-to-int c))))))
+  (let* ((path (format "%s/%s.bom" osxpkg-recipes-dir pkg))
+	 (files (and (file-exists-p path)
+		     (split-string
+		      (shell-command-to-string
+		       (format "%s -pfmMuUgGtsc '%s'"
+			       osxpkg-lsbom path))
+		      "[\n]+" t))))
+    (when files
+      (loop for file in files
+	    collect (destructuring-bind
+			(f m M u U g G ti s c)
+			(split-string file "\t" )
+		      (make-osxpkg-file
+		       :name f
+		       :nmode (string-to-int m)
+		       :mode M
+		       :uid (string-to-int u)
+		       :nuid U
+		       :gid (string-to-int g)
+		       :ngid G
+		       :timestamp (string-to-int ti)
+		       :size (string-to-int s)
+		       :cksum (string-to-int c)))))))
   
 (defun osxpkg-gen-pkg-plist (pkg)
   "Generate PAK plist suitable for `make-osxpkg'."
@@ -143,12 +146,15 @@ more information about the MATCH regexp."
 		     (list k (split-string v " " t)))
 		    ((string= "" v)
 		     (list k nil))
+		    ((string= "(null)" v)
+		     (list k nil))
 		    (t (list k v))))))
    (list :files  (osxpkg-get-pkg-content-detail pkg))))
 
 (defun osxpkg-get-packages-info (&rest packages)
   "Create osxpkg struct from PACKAGE."
   (loop for p in packages
+	do (message "Collecting %s" p)
 	collect
 	(apply #'make-osxpkg (osxpkg-gen-pkg-plist p))))
 
