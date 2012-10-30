@@ -5,7 +5,7 @@
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: emacs, 
 ;; Created: 2012-10-18
-;; Last changed: 2012-10-30 00:14:58
+;; Last changed: 2012-10-30 15:25:54
 ;; Licence: WTFPL, grab your copy here: http://sam.zoy.org/wtfpl/
 
 ;; This file is NOT part of GNU Emacs.
@@ -212,7 +212,17 @@ more information about the MATCH regexp."
 					  (seconds-to-time
 					   (osxpkg-install-time info)))))
 	(goto-char (point-min))))
+    (message "%S" info)
     (switch-to-buffer buffer)))
+
+(defun osxpkg-list-print-pkg (pkg)
+  "Print PKG details."
+  (let ((content (osxpkg-get-pkg-content pkg)))
+    (message "Getting info for %s" pkg)
+    (insert "  "
+	    (format "%10d " (length content))
+	    pkg
+	    "\n")))
 
 (defun osxpkg-list-pkg ()
   "List all installed packages."
@@ -222,7 +232,7 @@ more information about the MATCH regexp."
       (let ((buffer-read-only nil))
 	(erase-buffer)
 	(loop for pkg in (osxpkg-list-packages)
-	      do (insert "  " pkg "\n"))
+	      do (osxpkg-list-print-pkg pkg))
 	(goto-char (point-min))
 	(osxpkg-list-mode))
       (switch-to-buffer buffer))))
@@ -231,7 +241,7 @@ more information about the MATCH regexp."
   "View package details."
   (interactive)
   (let ((pkg (buffer-substring-no-properties
-	      (+ 2 (point-at-bol)) (point-at-eol))))
+	      (+ 13 (point-at-bol)) (point-at-eol))))
     (osxpkg-show-pkg pkg)))
 
 (unless osxpkg-list-mode-map
